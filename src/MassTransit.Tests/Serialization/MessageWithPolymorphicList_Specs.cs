@@ -20,12 +20,16 @@ namespace MassTransit.Tests.Serialization
         using NUnit.Framework;
         using TestFramework;
 
-        public class TestMessageWithPolymorphicList
+        public interface ITestMessageWithPolymorphicList
         {
             [JsonProperty(ItemTypeNameHandling = TypeNameHandling.All)]
-            public IList<ITestMessageWithPolymorphicListItem> Items { get; set; }
-        };
+            IList<ITestMessageWithPolymorphicListItem> Items { get; set; }
+        }
 
+        public class TestMessageWithPolymorphicList : ITestMessageWithPolymorphicList
+        {
+            public IList<ITestMessageWithPolymorphicListItem> Items { get; set; }
+        }
 
         public interface ITestMessageWithPolymorphicListItem
         {
@@ -36,9 +40,6 @@ namespace MassTransit.Tests.Serialization
         {
             public int SomeData { get; set; }
         }
-
-
-
 
         [TestFixture]
         public class MessageWithPolymorphicList_Specs :
@@ -61,7 +62,7 @@ namespace MassTransit.Tests.Serialization
 
                 await InputQueueSendEndpoint.Send(message);
 
-                ConsumeContext<TestMessageWithPolymorphicList> context = await _handled;
+                ConsumeContext<ITestMessageWithPolymorphicList> context = await _handled;
 
                 Assert.IsInstanceOf<TestMessageWithPolymorphicListItem>(context.Message.Items[0]);
             }
